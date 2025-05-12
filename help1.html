@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Disable Windows Defender - Step by Step</title>
@@ -71,6 +71,41 @@
       border: 1px solid white;
       margin-bottom: 5px;
     }
+    /* Right side menu */
+.right-menu {
+  position: fixed;
+  top: 204px;
+  right: 0;
+  background-color: #1f052ac7;
+  color: white;
+  padding: 0px 87px;
+  width: 180px;
+  backdrop-filter: blur(2px);
+  border-radius: 15px 0 0 15px;
+  box-shadow: -2px 2px 10px rgba(0,0,0,0.4);
+}
+
+.right-menu a {
+  display: flex;
+  align-items: center;
+  color: white;
+  text-decoration: none;
+  margin: 2px -82px;
+  padding: 18px 6px;
+  border-bottom: 1px solid #8d0f0f;
+  transition: background 0.2s ease;
+}
+
+.right-menu a:hover {
+  background-color: #333;
+}
+
+.right-menu img {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+}
+
 
     .sidebar h2 {
       margin: 10px 0 0;
@@ -114,6 +149,18 @@
   </style>
 </head>
 <body>
+<!-- Right Side Menu -->
+<div class="right-menu">
+  <a href="page1.html">
+    <img src="images/iconrepo.png" alt="Icon 1"> How to mod repo OFME
+  </a>
+  <a href="page2.html">
+    <img src="images/unknown.webp" alt="Icon 2"> How to ...!(soon..)
+  </a>
+  <a href="page3.html">
+    <img src="images/unknown.webp" alt="Icon 3"> How to ...!(soon..)
+  </a>
+</div>
 
   <!-- Sidebar with profile -->
   <div class="sidebar">
