@@ -5,29 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>how to mod REPO Tutorial - Step by Step</title>
   <style>
-      body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background: url(https://images8.alphacoders.com/135/thumb-1920-1354199.jpeg) no-repeat center center fixed;
-  background-size: cover;
-  color: #333;
-}
-    header {
-      background: #000000;
-      color: #fff;
-      border-radius: 15px 15px 15px 15px;
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: url(https://images8.alphacoders.com/135/thumb-1920-1354199.jpeg) no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+    header,
+    .discord-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgb(0 0 0) 100%); */
+      z-index: 999;
+      background: black;
+      color: white;
       padding: 20px;
       text-align: center;
     }
     .discord-header {
+      background: linear-gradient(180deg, black, #0d00418a);
+      padding: 10px 20px;
+      mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0.5%, rgba(0, 0, 0, 1) 10%);
+      font-family: sans-serif;
+      backdrop-filter: blur(5px);
+      top: 133px; /* Adjust based on the height of the header */
+      text-align: left;
       display: flex;
       align-items: center;
-      background-color: #313137;
-      color: white;
-      padding: 10px 20px;
-      font-family: sans-serif;
     }
     .discord-header img {
       width: 50px;
@@ -40,16 +49,17 @@
       margin-left: 5px;
     }
     .container {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
+      padding: 20px 20px 0px 20px;
+      max-width: 999px;
+      margin: 197px auto 0px auto;
       color: white;
+      mask-image: linear-gradient(to bottom, rgb(255 244 244 / 62%) 0%, rgb(59 52 52) 0.19%);
       backdrop-filter: blur(9px);
       background: linear-gradient(3deg, #000000c7, #20012fb5);
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-     /* Sidebar */
-     .sidebar {
+    /* Sidebar */
+    .sidebar {
       background-color: #5b000000;
       color: white;
       width: 161px;
@@ -71,52 +81,20 @@
       border: 1px solid white;
       margin-bottom: 5px;
     }
-    /* Right side menu */
-.right-menu {
-  position: fixed;
-  top: 204px;
-  right: 0;
-  background-color: #1f052ac7;
-  color: white;
-  padding: 0px 87px;
-  width: 180px;
-  backdrop-filter: blur(2px);
-  border-radius: 15px 0 0 15px;
-  box-shadow: -2px 2px 10px rgba(0,0,0,0.4);
-}
-
-.right-menu a {
-  display: flex;
-  align-items: center;
-  color: white;
-  text-decoration: none;
-  margin: 2px -82px;
-  padding: 18px 6px;
-  border-bottom: 1px solid #8d0f0f;
-  transition: background 0.2s ease;
-}
-
-.right-menu a:hover {
-  background-color: #333;
-}
-
-.right-menu img {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-}
-
 
     .sidebar h2 {
       margin: 10px 0 0;
       font-size: 20px;
     }
+
     h2 {
       color: #2748ff;
     }
+
     .step {
       margin-bottom: 30px;
     }
+
     .step img {
       width: 100%;
       max-width: 600px;
@@ -124,6 +102,7 @@
       margin: 10px 0;
       border: 1px solid #ccc;
     }
+
     .note {
       background: #12202ec2;
       border-left: 5px solid #0078D7;
@@ -131,13 +110,101 @@
       margin-top: 20px;
       border-radius: 16px;
     }
-    footer {
+
+    .right-menu1 {
+      position: fixed;
+      opacity: 0; /* Hidden by default */
+      pointer-events: none;
+      flex-direction: column;
+      z-index: 1000;
+      top: 204px;
+      right: 0;
+      background-color: #1f052ac7;
+      color: white;
+      transform: translate(100% , -104%);
+      padding: 0px 87px;
+      width: 180px;
+      backdrop-filter: blur(2px);
+      border-radius: 15px 0 0 15px;
+      box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .right-menu1 a {
+      display: flex;
+      align-items: center;
+      color: white;
+      text-decoration: none;
+      margin: 2px -82px;
+      border-radius: 8px;
+      padding: 18px 6px;
+      border-bottom: 1px solid #8d0f0f;
+      transition: background 0.2s ease;
+    }
+
+    .right-menu1 a:hover {
+      background-color: #333;
+      border-radius: 9px;
+    }
+
+    .right-menu1.show1 {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(0%, 0%);
+    }
+
+    .right-menu1 img {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+.hidebo {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    z-index: 1000;
+}
+
+     footer {
       text-align: center;
       padding: 10px;
+      margin: 6px -18px;
       background: #000000;
+      border-radius: 5px;
       font-size: 14px;
       color: aliceblue;
     }
+
+    .scrollable-content {
+      margin: 0px; /* height of header + discord-header */
+      /* overflow-y: auto; */
+      max-height: calc(100vh - 140px);
+      padding-bottom: 140px; /* for footer space */
+    }
+    .hohoho {
+    width: 30px; height: 30px; z-index: 1000;
+    transition: all 300ms ease;
+
+}
+.hohoho:hover {
+    z-index: 1000;
+    filter: hue-rotate(45deg) brightness(3.0) blur(0.5px) invert(1);
+}
+.haha1 {
+background: rgba(94, 94, 100, 0.482); border: none; cursor: pointer;transition: all 300ms ease;border-radius: 5px; padding: 0px 5px;
+
+}
+.haha1:hover {
+background: rgba(33, 2, 155, 0.664); border: none; cursor: pointer;transform: scale(1.05);backdrop-filter: blur(1px);
+
+}
+.haha1:active {
+background: rgb(0, 0, 0); border: none; cursor: pointer;
+
+}
+.meaw1 {
+    position: fixed; top: 10px; right: 9px; z-index: 1000;
+}
     @media screen and (max-width: 768px) {
       .sidebar {
         display: none;
@@ -150,7 +217,13 @@
 </head>
 <body>
 <!-- Right Side Menu -->
-<div class="right-menu">
+  <div class="meaw1">
+    <button id="menuToggleBtn1" class="haha1">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828859.png" alt="Menu" class="hohoho">
+    </button>
+  </div>
+  <!-- Right Side Menu -->
+<div class="right-menu1" id="menu1">
   <a href="help1.html">
     <img src="images/icon1.png" alt="Icon 1"> How to disable av & exclude files
   </a>
@@ -181,6 +254,7 @@
     </span>
   </div>
 
+ <div class="scrollable-content">
   <div class="container">
     <h2>Part 1: Download gale mod manager</h2>
 
@@ -220,10 +294,25 @@
       <p>thats all enjoy your game <strong></strong> section and click <strong>Add or remove exclusions</strong>.</p>
       <img src="images/modf.png" alt="Exclusions section">
     </div>
-  </div>
-
-  <footer>
-    &copy; shado& Tutorial 2025 | All rights reserved.
+    <footer>
+    &copy; 2025 shado Tutorial | All rights reserved.
   </footer>
+  </div>
+  <script>
+  const toggleBtn = document.getElementById('menuToggleBtn1');
+const menu = document.getElementById('menu1');
+
+// Toggle menu on button click
+toggleBtn.addEventListener('click', function (e) {
+  e.stopPropagation(); // Prevent click from bubbling up to document
+  menu.classList.toggle('show1');
+});
+
+// Hide menu when clicking outside
+document.addEventListener('click', function (e) {
+  if (!menu.contains(e.target) && !toggleBtn.contains(e.target)) {
+    menu.classList.remove('show1');
+  }
+});</script>
 </body>
 </html>
