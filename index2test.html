@@ -206,6 +206,12 @@
       backdrop-filter: blur(5px);
       text-align: center;
     }
+    
+    #captcha-message {
+      color: #ff5252;
+      margin-top: 10px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -241,6 +247,7 @@
   <!-- CAPTCHA container -->
   <div id="captcha-box">
     <div class="g-recaptcha" data-sitekey="6LcPqTcrAAAAADvXMoezeaXtv5mEbg3JUZsDJJlV" data-callback="onCaptchaVerified"></div>
+    <p id="captcha-message">Please complete the CAPTCHA verification</p>
   </div>
 
   <!-- Scripts -->
@@ -256,22 +263,51 @@
       document.body.appendChild(firefly);
     }
 
+    // Global variable to track if CAPTCHA has been verified
+    let captchaVerified = false;
+
     // Show the CAPTCHA when the "Help" button is clicked
     function showCaptcha() {
       document.getElementById("captcha-box").style.display = "block";  // Show CAPTCHA
+      document.getElementById("captcha-message").style.display = "none"; // Hide error message initially
+      captchaVerified = false; // Reset verification status
+      
+      // Reset CAPTCHA if it was previously used
+      if (typeof grecaptcha !== 'undefined') {
+        grecaptcha.reset();
+      }
     }
 
     // This is called after the CAPTCHA is verified successfully
-    function onCaptchaVerified() {
-      document.getElementById("captcha-box").style.display = "none";  // Hide CAPTCHA after success
-      document.getElementById("helpPopup").classList.add("show");  // Show the help popup
-      grecaptcha.reset();  // Optional, allows CAPTCHA to be used again later
+    function onCaptchaVerified(response) {
+      if (response) {
+        captchaVerified = true;
+        document.getElementById("captcha-box").style.display = "none";  // Hide CAPTCHA after success
+        document.getElementById("helpPopup").classList.add("show");  // Show the help popup
+      } else {
+        document.getElementById("captcha-message").style.display = "block";
+      }
     }
 
     // Close the popup
     function closePopup() {
       document.getElementById("helpPopup").classList.remove("show");
     }
+    
+    // Add an event listener to handle clicks on the CAPTCHA checkbox
+    document.addEventListener('DOMContentLoaded', function() {
+      // This will intercept any attempts to hide the CAPTCHA prematurely
+      const captchaBox = document.getElementById("captcha-box");
+      
+      // Add a click event to the captcha box to prevent bubbling
+      captchaBox.addEventListener('click', function(event) {
+        // If someone clicks anywhere in the captcha box but it's not verified yet
+        if (!captchaVerified) {
+          // Don't allow event propagation that might hide the captcha
+          event.stopPropagation();
+        }
+      });
+    });
   </script>
 </body>
 </html>
