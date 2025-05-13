@@ -256,16 +256,19 @@
       document.body.appendChild(firefly);
     }
 
+    // Show the CAPTCHA when the "Help" button is clicked
     function showCaptcha() {
-      document.getElementById("captcha-box").style.display = "block";
+      document.getElementById("captcha-box").style.display = "block";  // Show CAPTCHA
     }
 
+    // This is called after the CAPTCHA is verified successfully
     function onCaptchaVerified() {
-      document.getElementById("captcha-box").style.display = "none";
-      document.getElementById("helpPopup").classList.add("show");
-      grecaptcha.reset(); // optional if you want to allow multiple uses
+      document.getElementById("captcha-box").style.display = "none";  // Hide CAPTCHA after success
+      document.getElementById("helpPopup").classList.add("show");  // Show the help popup
+      grecaptcha.reset();  // Optional, allows CAPTCHA to be used again later
     }
 
+    // Close the popup
     function closePopup() {
       document.getElementById("helpPopup").classList.remove("show");
     }
