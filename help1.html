@@ -1,33 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
+<head><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script><script type="text/javascript" src="/___vscode_livepreview_injected_script"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Disable Windows Defender - Step by Step</title>
   <style>
-      body {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background: url(https://images8.alphacoders.com/135/thumb-1920-1354199.jpeg) no-repeat center center fixed;
-  background-size: cover;
-  color: #333;
-}
-    header {
-      background: #000000;
-      color: #fff;
-      border-radius: 15px 15px 15px 15px;
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+      background: url(https://images8.alphacoders.com/135/thumb-1920-1354199.jpeg) no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+    header,
+    .discord-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      /* mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0%, rgb(0 0 0) 100%); */
+      z-index: 999;
+      background: black;
+      color: white;
       padding: 20px;
       text-align: center;
     }
     .discord-header {
+      background: linear-gradient(180deg, black, #0d00418a);
+      padding: 10px 20px;
+      mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0.5%, rgba(0, 0, 0, 1) 10%);
+      font-family: sans-serif;
+      backdrop-filter: blur(5px);
+      top: 133px; /* Adjust based on the height of the header */
+      text-align: left;
       display: flex;
       align-items: center;
-      background-color: #313137;
-      color: white;
-      padding: 10px 20px;
-      font-family: sans-serif;
     }
     .discord-header img {
       width: 50px;
@@ -40,16 +49,17 @@
       margin-left: 5px;
     }
     .container {
-      padding: 20px;
-      max-width: 1000px;
-      margin: auto;
+      padding: 20px 20px 0px 20px;
+      max-width: 999px;
+      margin: 197px auto 0px auto;
       color: white;
+      mask-image: linear-gradient(to bottom, rgb(255 244 244 / 62%) 0%, rgb(59 52 52) 0.19%);
       backdrop-filter: blur(9px);
       background: linear-gradient(3deg, #000000c7, #20012fb5);
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
-     /* Sidebar */
-     .sidebar {
+    /* Sidebar */
+    .sidebar {
       background-color: #5b000000;
       color: white;
       width: 161px;
@@ -71,52 +81,20 @@
       border: 1px solid white;
       margin-bottom: 5px;
     }
-    /* Right side menu */
-.right-menu {
-  position: fixed;
-  top: 204px;
-  right: 0;
-  background-color: #1f052ac7;
-  color: white;
-  padding: 0px 87px;
-  width: 180px;
-  backdrop-filter: blur(2px);
-  border-radius: 15px 0 0 15px;
-  box-shadow: -2px 2px 10px rgba(0,0,0,0.4);
-}
-
-.right-menu a {
-  display: flex;
-  align-items: center;
-  color: white;
-  text-decoration: none;
-  margin: 2px -82px;
-  padding: 18px 6px;
-  border-bottom: 1px solid #8d0f0f;
-  transition: background 0.2s ease;
-}
-
-.right-menu a:hover {
-  background-color: #333;
-}
-
-.right-menu img {
-  width: 20px;
-  height: 20px;
-  margin-right: 10px;
-}
-
 
     .sidebar h2 {
       margin: 10px 0 0;
       font-size: 20px;
     }
+
     h2 {
       color: #2748ff;
     }
+
     .step {
       margin-bottom: 30px;
     }
+
     .step img {
       width: 100%;
       max-width: 600px;
@@ -124,6 +102,7 @@
       margin: 10px 0;
       border: 1px solid #ccc;
     }
+
     .note {
       background: #12202ec2;
       border-left: 5px solid #0078D7;
@@ -131,13 +110,101 @@
       margin-top: 20px;
       border-radius: 16px;
     }
-    footer {
+
+    .right-menu1 {
+      position: fixed;
+      opacity: 0; /* Hidden by default */
+      pointer-events: none;
+      flex-direction: column;
+      z-index: 1000;
+      top: 204px;
+      right: 0;
+      background-color: #1f052ac7;
+      color: white;
+      transform: translate(100% , -104%);
+      padding: 0px 87px;
+      width: 180px;
+      backdrop-filter: blur(2px);
+      border-radius: 15px 0 0 15px;
+      box-shadow: -2px 2px 10px rgba(0, 0, 0, 0.4);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .right-menu1 a {
+      display: flex;
+      align-items: center;
+      color: white;
+      text-decoration: none;
+      margin: 2px -82px;
+      border-radius: 8px;
+      padding: 18px 6px;
+      border-bottom: 1px solid #8d0f0f;
+      transition: background 0.2s ease;
+    }
+
+    .right-menu1 a:hover {
+      background-color: #333;
+      border-radius: 9px;
+    }
+
+    .right-menu1.show1 {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(0%, 0%);
+    }
+
+    .right-menu1 img {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+.hidebo {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    z-index: 1000;
+}
+
+     footer {
       text-align: center;
       padding: 10px;
+      margin: 6px -18px;
       background: #000000;
+      border-radius: 5px;
       font-size: 14px;
       color: aliceblue;
     }
+
+    .scrollable-content {
+      margin: 0px; /* height of header + discord-header */
+      /* overflow-y: auto; */
+      max-height: calc(100vh - 140px);
+      padding-bottom: 140px; /* for footer space */
+    }
+    .hohoho {
+    width: 30px; height: 30px; z-index: 1000;
+    transition: all 300ms ease;
+
+}
+.hohoho:hover {
+    z-index: 1000;
+    filter: hue-rotate(45deg) brightness(3.0) blur(0.5px) invert(1);
+}
+.haha1 {
+background: rgba(94, 94, 100, 0.482); border: none; cursor: pointer;transition: all 300ms ease;border-radius: 5px; padding: 0px 5px;
+
+}
+.haha1:hover {
+background: rgba(33, 2, 155, 0.664); border: none; cursor: pointer;transform: scale(1.05);backdrop-filter: blur(1px);
+
+}
+.haha1:active {
+background: rgb(0, 0, 0); border: none; cursor: pointer;
+
+}
+.meaw1 {
+    position: fixed; top: 10px; right: 9px; z-index: 1000;
+}
     @media screen and (max-width: 768px) {
       .sidebar {
         display: none;
@@ -147,20 +214,29 @@
       }
     }
   </style>
-</head>
+<!-- Code injected by Five-server -->
+  <script async data-id="five-server" data-file="d:\moha data\imgtou\index2.html" type="application/javascript" src="/fiveserver.js"></script>
+  </head>
 <body>
-<!-- Right Side Menu -->
-<div class="right-menu">
-  <a href="help2.html">
-    <img src="images/iconrepo.png" alt="Icon 1"> How to mod repo OFME
-  </a>
-  <a href="page2.html">
-    <img src="images/unknown.webp" alt="Icon 2"> How to ...!(soon..)
-  </a>
-  <a href="page3.html">
-    <img src="images/unknown.webp" alt="Icon 3"> How to ...!(soon..)
-  </a>
-</div>
+  <!-- Right Side Menu -->
+  <div class="meaw1">
+    <button id="menuToggleBtn1" class="haha1">
+      <img src="https://cdn-icons-png.flaticon.com/512/1828/1828859.png" alt="Menu" class="hohoho">
+    </button>
+  </div>
+
+  <!-- Right Side Menu -->
+  <div class="right-menu1" id="menu1">
+    <a href="help2.html">
+      <img src="images/iconrepo.png" alt="Icon 1"> How to mod repo OFME
+    </a>
+    <a href="page2.html">
+      <img src="images/unknown.webp" alt="Icon 2"> How to ...!(soon..)
+    </a>
+    <a href="page3.html">
+      <img src="images/unknown.webp" alt="Icon 3"> How to ...!(soon..)
+    </a>
+  </div>
 
   <!-- Sidebar with profile -->
   <div class="sidebar">
@@ -174,70 +250,92 @@
       <h1>How to Disable Windows Defender & Exclude a Folder</h1>
     </header>
 
-  <div class="discord-header">
-    <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" alt="Discord Icon" />
-    <span>For more info, join us on 
-      <a href="https://discord.gg/FdMGmcq6" target="_blank">Discord</a>
-    </span>
-  </div>
-    
-  <div class="container">
-    <h2>Part 1: Disable Real-Time Protection</h2>
-
-    <div class="step">
-      <h3>Step 1: Open Windows Security</h3>
-      <p>Click on the Start menu and type <strong>"Windows Security"</strong>. Open the app.</p>
-      <img src="images/S1.png" alt="Open Windows Security">
+    <div class="discord-header">
+      <img src="https://cdn-icons-png.flaticon.com/512/2111/2111370.png" alt="Discord Icon" />
+      <span>For more info, join us on 
+        <a href="https://discord.gg/FdMGmcq6" target="_blank">Discord</a>
+      </span>
     </div>
 
-    <div class="step">
-      <h3>Step 2: Click on 'Virus & threat protection'</h3>
-      <p>On the left sidebar, click on <strong>Virus & threat protection</strong>.</p>
-      <img src="images/S2.png" alt="Virus and threat protection">
-    </div>
+    <div class="scrollable-content">
+      <div class="container">
+        <h2>Part 1: Disable Real-Time Protection</h2>
 
-    <div class="step">
-      <h3>Step 3: Click on 'Manage settings'</h3>
-      <p>Scroll down and click <strong>Manage settings</strong> under the "Virus & threat protection settings" section.</p>
-      <img src="images/S3.png" alt="Manage settings">
-    </div>
+        <div class="step">
+          <h3>Step 1: Open Windows Security</h3>
+          <p>Click on the Start menu and type <strong>"Windows Security"</strong>. Open the app.</p>
+          <img src="images/S1.png" alt="Open Windows Security">
+        </div>
 
-    <div class="step">
-      <h3>Step 4: Turn Off Real-time protection</h3>
-      <p>Switch the toggle under <strong>Real-time protection</strong> to <strong>Off</strong>.</p>
-      <img src="images/S4.png" alt="Turn off real-time protection">
-      <img src="images/SX.png" alt="Turn off real-time protection1">
-    </div>
+        <div class="step">
+          <h3>Step 2: Click on 'Virus & threat protection'</h3>
+          <p>On the left sidebar, click on <strong>Virus & threat protection</strong>.</p>
+          <img src="images/S2.png" alt="Virus and threat protection">
+        </div>
 
-    <h2>Part 2: Exclude a Folder</h2>
+        <div class="step">
+          <h3>Step 3: Click on 'Manage settings'</h3>
+          <p>Scroll down and click <strong>Manage settings</strong> under the "Virus & threat protection settings" section.</p>
+          <img src="images/S3.png" alt="Manage settings">
+        </div>
 
-    <div class="step">
-      <h3>Step 1: Scroll to 'Exclusions'</h3>
-      <p>From the same page, scroll down to the <strong>Exclusions</strong> section and click <strong>Add or remove exclusions</strong>.</p>
-      <img src="images/S3.png" alt="Exclusions section">
-      <img src="images/S5.png" alt="Exclusions section">
-    </div>
+        <div class="step">
+          <h3>Step 4: Turn Off Real-time protection</h3>
+          <p>Switch the toggle under <strong>Real-time protection</strong> to <strong>Off</strong>.</p>
+          <img src="images/S4.png" alt="Turn off real-time protection">
+          <img src="images/SX.png" alt="Turn off real-time protection1">
+        </div>
 
-    <div class="step">
-      <h3>Step 2: Add a Folder</h3>
-      <p>Click <strong>Add an exclusion</strong> and select <strong>Folder</strong>.</p>
-      <img src="images/S6.png" alt="Add an exclusion folder">
-      <img src="images/S7.png" alt="Exclusions 7section">
-    </div>
+        <h2>Part 2: Exclude a Folder</h2>
 
-    <div class="step">
-      <h3>Step 3: Select Your Folder</h3>
-      <p>Browse and select the folder you want to exclude, then click <strong>Select Folder</strong>.</p>
-      <img src="images/SF8.png" alt="Select folder">
-    </div>
+        <div class="step">
+          <h3>Step 1: Scroll to 'Exclusions'</h3>
+          <p>From the same page, scroll down to the <strong>Exclusions</strong> section and click <strong>Add or remove exclusions</strong>.</p>
+          <img src="images/S3.png" alt="Exclusions section">
+          <img src="images/S5.png" alt="Exclusions section">
+        </div>
 
-    <div class="note">
-      <strong>Note:</strong> Disabling real-time protection or excluding folders can expose your computer to threats. Only do this for trusted files or during specific troubleshooting.
-    </div>
-  </div>
+        <div class="step">
+          <h3>Step 2: Add a Folder</h3>
+          <p>Click <strong>Add an exclusion</strong> and select <strong>Folder</strong>.</p>
+          <img src="images/S6.png" alt="Add an exclusion folder">
+          <img src="images/S7.png" alt="Exclusions 7section">
+        </div>
 
-  <footer>
+        <div class="step">
+          <h3>Step 3: Select Your Folder</h3>
+          <p>Browse and select the folder you want to exclude, then click <strong>Select Folder</strong>.</p>
+          <img src="images/SF8.png" alt="Select folder">
+        </div>
+
+        <div class="note">
+          <strong>Note:</strong> Disabling real-time protection or excluding folders can expose your computer to threats. Only do this for trusted files or during specific troubleshooting.
+        </div>
+          <footer>
     &copy; shado& Tutorial 2025 | All rights reserved.
   </footer>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    const toggleBtn = document.getElementById('menuToggleBtn1');
+const menu = document.getElementById('menu1');
+
+// Toggle menu on button click
+toggleBtn.addEventListener('click', function (e) {
+  e.stopPropagation(); // Prevent click from bubbling up to document
+  menu.classList.toggle('show1');
+});
+
+// Hide menu when clicking outside
+document.addEventListener('click', function (e) {
+  if (!menu.contains(e.target) && !toggleBtn.contains(e.target)) {
+    menu.classList.remove('show1');
+  }
+});
+  </script>
 </body>
 </html>
