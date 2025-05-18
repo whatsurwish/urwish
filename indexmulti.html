@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <!-- ... existing head content ... -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+  <meta charset="UTF-8" />
+  <title>Falling Bags Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    html, body {
+      background: url(https://cdn.theanimegallery.com/theanimegallery/0f50ae0f-3151-4586-8a03-bd255c359ee5-anime-wallpaper-in-hd.webp);
+      margin: 0;
+      background-size: contain;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    p {
+    font-weight: 800;
+    font-family: monospace;
+    background: linear-gradient(360deg, #7600fb, #000000);
+    margin: 9px 55px;
+    padding: 10px 0px;
+    color: blanchedalmond;
+    border-radius: 0px 0px 33px 33px;
+    min-width: 260px;
+}
+   p2 {
+    font-weight: 800;
+    font-family: sans-serif;
+    background: linear-gradient(0deg, #000000, #07faff);
+    margin: 0px 13px;
+    z-index: -100;
+    padding: 10px 16px;
+    color: blanchedalmond;
+    border-radius: 33px 33px 0px 0px;
+    position: relative;
+}
+    #pauseBtn {
+    position: fixed;
+    top: 10px;
+    transform: translate(-227px, -3px);
+    z-index: 1000;
+    background: #000000;
+    border: none;
+    color: white;
+    font-size: 16px;
+    padding: 2px 2px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    }
+
+    #difficultySelect {
+      margin: 2px;
+      font-size: 16px;
+      font-family: monospace;
+      padding: 2px 14px;
+      border-radius: 2px;
+      background: #7f98ff;
+      border: 2px solid #000000bf;
+      max-width: 200px;
+      width: 95vw;
+      max-width: 200px;
+    }
+
+    #gameBox {
+    width: 95vw;
+    max-width: 500px;
+    min-width: 450px;
+    height: 100dvh;
+    border: 4px solid rgb(0, 0, 0);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(3px);
+    background: linear-gradient(rgba(51, 0, 255, 0.679), rgba(5, 169, 219, 0.671));
+  }
+
+    .bag {
+      width: 24vw;
+      max-width: 112px;
+      height: 24vw;
+      max-height: 112px;
+      background: url('images/goodie.png') no-repeat center/contain;
+      position: absolute;
+      top: -60px;
+      cursor: pointer;
+      animation-timing-function: linear;
+    }
+
+    @keyframes fall {
+      from { top: -100px; }
+      to { top: 100%; }
+    }
+
+    #popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      min-width: 320px;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 0, 0, 0.531);
+      backdrop-filter: blur(4px);
+      color: #fff7f7;
+      padding: 30px 40px;
+      border-radius: 5px;
+      text-align: center;
+      font-size: 20px;
+      display: none;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+      z-index: 10;
+      flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: nowrap;
+    }
+
+    #popup button {
+    padding: 5px 15px;
+    font-size: 18px;
+    cursor: pointer;
+    position: revert-layer;
+    background: #7600fb;
+    border: none;
+    border-radius: 11px;
+    margin: 7px 0px;
+    color: white;
+    transition: all 300ms ease;
+    }
+    #popup button:hover {
+    background: #410288;
+
+    }
+    input {
+      border-radius: 12px;
+      background: linear-gradient(0deg , blue , rgba(0, 0, 0, 0));
+      border: none;
+      text-align: center;
+      color: white;
+      border-bottom: blue solid 2px;
+      padding: 15px 15px;
+      transition: all 300ms ease;
+    }
+    input:focus {
+      border-radius: 12px;
+      background: #02536360;
+      border: none;
+      color: #000000;
+      border-bottom: rgb(0, 0, 0) solid 2px;
+      padding: 15px 15px;
+    }
+    #restartBtn {
+      background-color: green;
+    }
+
+    #resumeBtn {
+      background-color: orange;
+    }
+  </style>
+</head>
+<body>
+<button id="pauseBtn" aria-label="Pause game" title="Pause game">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="4" width="5" height="16" rx="1"/>
+    <rect x="14" y="4" width="5" height="16" rx="1"/>
+  </svg>
+</button>
+
+
+  <div id="gameBox">
+     
+  </div>
+  <div id="popup"></div>
+  <audio id="popSound" src="win.wav"></audio>
+
+<script>
+// Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyCU1YjVXVXgy_xIoS-zMsuSfHbqB0AfwsI",
+  authDomain: "bagsgame3.firebaseapp.com",
+  databaseURL: "https://bagsgame3-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "bagsgame3",
+  storageBucket: "bagsgame3.firebasestorage.app",
+  messagingSenderId: "62792195568",
+  appId: "1:62792195568:web:0e0125c048e6b5643e5135",
+  measurementId: "G-9KGTYGZD2N"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// Game elements
+const gameBox = document.getElementById('gameBox');
+const popup = document.getElementById('popup');
+const popSound = document.getElementById('popSound');
+const pauseBtn = document.getElementById('pauseBtn');
+
+// Game state
+let currentDifficulty = 'normal';
+let totalCoins = 0;
+let gameRunning = false;
+let gameInterval;
+let gameTimeout;
+let gameStartTime = 0;
+let elapsedTime = 0;
+const gameDuration = 20000;
+
+// Multiplayer state
+let playerId = Math.random().toString(36).substring(2, 15);
+let roomId = null;
+let opponentId = null;
+let opponentCoins = 0;
+let isHost = false;
+
+// Difficulty settings
+const difficultySettings = {
+  normal: { minDuration: 4, maxDuration: 6 },
+  medium: { minDuration: 3, maxDuration: 4.5 },
+  hard: { minDuration: 1.5, maxDuration: 2.5 },
+  khra_la_shditi: { minDuration: 0.5, maxDuration: 1.5 }
+};
+
+// Create a new room
+function createRoom() {
+  isHost = true;
+  roomId = Math.random().toString(36).substring(2, 9);
+  database.ref('rooms/' + roomId).set({
+    host: playerId,
+    difficulty: currentDifficulty,
+    gameRunning: false,
+    players: {
+      [playerId]: {
+        coins: 0,
+        ready: false
+      }
+    }
+  });
+  
+  // Listen for opponent joining
+  database.ref('rooms/' + roomId + '/players').on('child_added', (snapshot) => {
+    if (snapshot.key !== playerId) {
+      opponentId = snapshot.key;
+      updateOpponentCoins();
+      showWaitingPopup(true);
+    }
+  });
+  
+  showWaitingPopup(false);
+}
+
+// Join an existing room
+function joinRoom(roomCode) {
+  roomId = roomCode;
+  database.ref('rooms/' + roomId).once('value').then((snapshot) => {
+    if (snapshot.exists()) {
+      const room = snapshot.val();
+      currentDifficulty = room.difficulty || 'normal';
+      isHost = false;
+      
+      // Add myself to players
+      database.ref('rooms/' + roomId + '/players/' + playerId).set({
+        coins: 0,
+        ready: false
+      });
+      
+      // Find host
+      opponentId = room.host;
+      updateOpponentCoins();
+      
+      // Listen for game start
+      database.ref('rooms/' + roomId + '/gameRunning').on('value', (snapshot) => {
+        if (snapshot.val() === true) {
+          startGame();
+        }
+      });
+      
+      showWaitingPopup(true);
+    } else {
+      alert('Room not found!');
+    }
+  });
+}
+
+// Update opponent's coins display
+function updateOpponentCoins() {
+  database.ref('rooms/' + roomId + '/players/' + opponentId + '/coins').on('value', (snapshot) => {
+    opponentCoins = snapshot.val() || 0;
+    updateScoreDisplay();
+  });
+}
+
+// Update the score display for both players
+function updateScoreDisplay() {
+  const scoreElement = document.getElementById('multiplayerScore');
+  if (!scoreElement) {
+    const scoreDiv = document.createElement('div');
+    scoreDiv.id = 'multiplayerScore';
+    scoreDiv.style.position = 'fixed';
+    scoreDiv.style.top = '10px';
+    scoreDiv.style.right = '10px';
+    scoreDiv.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    scoreDiv.style.color = 'white';
+    scoreDiv.style.padding = '10px';
+    scoreDiv.style.borderRadius = '5px';
+    scoreDiv.style.zIndex = '1000';
+    document.body.appendChild(scoreDiv);
+  }
+  
+  document.getElementById('multiplayerScore').innerHTML = `
+    <div>You: ${totalCoins} DH🪙</div>
+    <div>Opponent: ${opponentCoins} DH🪙</div>
+  `;
+}
+
+// Show waiting popup
+function showWaitingPopup(isJoiner) {
+  popup.innerHTML = `
+    <p2>${isJoiner ? 'Waiting for host...' : 'Room created!'}</p2>
+    <p>Room Code: <strong>${roomId}</strong></p>
+    <p>Share this code with your friend</p>
+    ${isHost ? '<button id="startGameBtn">Start Game</button>' : ''}
+  `;
+  
+  if (isHost) {
+    document.getElementById('startGameBtn').onclick = () => {
+      database.ref('rooms/' + roomId).update({
+        gameRunning: true
+      });
+      startGame();
+    };
+  }
+  
+  popup.style.display = 'flex';
+}
+
+// Modified createBag function
+function createBag() {
+  if (!gameRunning) return;
+
+  const bag = document.createElement('div');
+  bag.classList.add('bag');
+
+  const boxWidth = gameBox.clientWidth;
+  const bagWidth = boxWidth * 0.24;
+  const left = Math.random() * (boxWidth - bagWidth);
+  bag.style.left = left + 'px';
+
+  const { minDuration, maxDuration } = difficultySettings[currentDifficulty];
+  const duration = minDuration + Math.random() * (maxDuration - minDuration);
+  bag.style.animation = `fall ${duration}s linear forwards`;
+
+  bag.addEventListener('click', () => {
+    navigator.vibrate?.(80);
+    popSound.currentTime = 0;
+    popSound.play();
+
+    const coins = Math.floor(Math.random() * 400) + 1;
+    totalCoins += coins;
+    
+    // Update coins in database
+    database.ref('rooms/' + roomId + '/players/' + playerId).update({
+      coins: totalCoins
+    });
+
+    bag.remove();
+  });
+
+  gameBox.appendChild(bag);
+
+  setTimeout(() => {
+    if (gameBox.contains(bag)) {
+      bag.remove();
+    }
+  }, duration * 1000);
+}
+
+// Modified showPopup function
+function showPopup(withResume = false) {
+  document.querySelectorAll('.bag').forEach(bag => bag.remove());
+  
+  // Determine winner
+  let resultMessage = '';
+  if (totalCoins > opponentCoins) {
+    resultMessage = 'You won! 🎉';
+  } else if (totalCoins < opponentCoins) {
+    resultMessage = 'You lost! 😢';
+  } else {
+    resultMessage = 'It\'s a tie! 🤝';
+  }
+
+  popup.innerHTML = ` 
+    <p2>${resultMessage}</p2>
+    <p><strong>You: ${totalCoins}DH🪙</strong></p>
+    <p><strong>Opponent: ${opponentCoins}DH🪙</strong></p>
+    <br><br>
+    <button id="restartBtn">Play Again</button>
+    <button id="newRoomBtn">New Room</button>
+  `;
+
+  document.getElementById('restartBtn').onclick = () => {
+    if (isHost) {
+      database.ref('rooms/' + roomId).update({
+        gameRunning: true
+      });
+    }
+    startGame();
+  };
+
+  document.getElementById('newRoomBtn').onclick = () => {
+    // Clean up old room
+    if (isHost) {
+      database.ref('rooms/' + roomId).remove();
+    } else {
+      database.ref('rooms/' + roomId + '/players/' + playerId).remove();
+    }
+    createRoom();
+  };
+
+  popup.style.display = 'flex';
+}
+
+// Modified startGame function
+function startGame() {
+  totalCoins = 0;
+  opponentCoins = 0;
+  gameRunning = true;
+  popup.style.display = 'none';
+  gameBox.innerHTML = '';
+
+  // Reset player coins
+  database.ref('rooms/' + roomId + '/players/' + playerId).update({
+    coins: 0,
+    ready: true
+  });
+
+  // Reset timers
+  clearInterval(gameInterval);
+  clearTimeout(gameTimeout);
+
+  gameStartTime = Date.now();
+  elapsedTime = 0;
+
+  gameInterval = setInterval(createBag, 400);
+
+  gameTimeout = setTimeout(() => {
+    gameRunning = false;
+    clearInterval(gameInterval);
+    showPopup(false);
+  }, gameDuration);
+}
+
+// Initial popup to create or join room
+function showInitialPopup() {
+  popup.innerHTML = `
+    <p2>Multiplayer Falling Bags</p2>
+    <p>Play with a friend!</p>
+    <button id="createRoomBtn">Create Room</button>
+    <input type="text" id="roomCodeInput" placeholder="Enter room code">
+    <button id="joinRoomBtn">Join Room</button>
+  `;
+  
+  document.getElementById('createRoomBtn').onclick = () => createRoom();
+  document.getElementById('joinRoomBtn').onclick = () => {
+    const roomCode = document.getElementById('roomCodeInput').value.trim();
+    if (roomCode) joinRoom(roomCode);
+  };
+  
+  popup.style.display = 'flex';
+}
+
+// Start the game by showing initial popup
+showInitialPopup();
+</script>
+
+</body>
+</html>
