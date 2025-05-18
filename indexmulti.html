@@ -56,7 +56,7 @@
     user-select: none;
     }
 
-    #difficultySelect {
+    #initialDifficulty {
       margin: 2px;
       font-size: 16px;
       font-family: monospace;
@@ -226,7 +226,7 @@ const difficultySettings = {
   khra_la_shditi: { minDuration: 0.5, maxDuration: 1.5 }
 };
 
-// Create a new room
+// Create a new room with difficulty selection
 function createRoom() {
   isHost = true;
   roomId = Math.random().toString(36).substring(2, 9);
@@ -239,6 +239,15 @@ function createRoom() {
         coins: 0,
         ready: false
       }
+    }
+  });
+  
+  // Listen for difficulty changes
+  database.ref('rooms/' + roomId + '/difficulty').on('value', (snapshot) => {
+    if (snapshot.exists()) {
+      currentDifficulty = snapshot.val();
+      updateDifficultySelect();
+      updateScoreDisplay();
     }
   });
   
@@ -273,6 +282,15 @@ function joinRoom(roomCode) {
       opponentId = room.host;
       updateOpponentCoins();
       
+      // Listen for difficulty changes
+      database.ref('rooms/' + roomId + '/difficulty').on('value', (snapshot) => {
+        if (snapshot.exists()) {
+          currentDifficulty = snapshot.val();
+          updateDifficultySelect();
+          updateScoreDisplay();
+        }
+      });
+      
       // Listen for game start
       database.ref('rooms/' + roomId + '/gameRunning').on('value', (snapshot) => {
         if (snapshot.val() === true) {
@@ -287,6 +305,24 @@ function joinRoom(roomCode) {
   });
 }
 
+// Update difficulty select element
+function updateDifficultySelect() {
+  const select = document.getElementById('difficultySelect');
+  if (select) {
+    select.value = currentDifficulty;
+  }
+}
+
+// Handle difficulty change (host only)
+function handleDifficultyChange() {
+  if (!isHost) return;
+  
+  const newDifficulty = document.getElementById('difficultySelect').value;
+  database.ref('rooms/' + roomId).update({
+    difficulty: newDifficulty
+  });
+}
+
 // Update opponent's coins display
 function updateOpponentCoins() {
   database.ref('rooms/' + roomId + '/players/' + opponentId + '/coins').on('value', (snapshot) => {
@@ -295,7 +331,7 @@ function updateOpponentCoins() {
   });
 }
 
-// Update the score display for both players
+// Update the score display with difficulty info
 function updateScoreDisplay() {
   const scoreElement = document.getElementById('multiplayerScore');
   if (!scoreElement) {
@@ -315,19 +351,31 @@ function updateScoreDisplay() {
   document.getElementById('multiplayerScore').innerHTML = `
     <div>You: ${totalCoins} DH🪙</div>
     <div>Opponent: ${opponentCoins} DH🪙</div>
+    <div>Difficulty: ${currentDifficulty}</div>
   `;
 }
 
-// Show waiting popup
+// Show waiting popup with difficulty controls
 function showWaitingPopup(isJoiner) {
   popup.innerHTML = `
     <p2>${isJoiner ? 'Waiting for host...' : 'Room created!'}</p2>
     <p>Room Code: <strong>${roomId}</strong></p>
     <p>Share this code with your friend</p>
+    
+    <label for="difficultySelect">Difficulty:</label>
+    <select id="difficultySelect" ${isHost ? '' : 'disabled'}>
+      <option value="normal" ${currentDifficulty === 'normal' ? 'selected' : ''}>Normal</option>
+      <option value="medium" ${currentDifficulty === 'medium' ? 'selected' : ''}>Medium</option>
+      <option value="hard" ${currentDifficulty === 'hard' ? 'selected' : ''}>Hard</option>
+      <option value="khra_la_shditi" ${currentDifficulty === 'khra_la_shditi' ? 'selected' : ''}>khra la shditi</option>
+    </select>
+    
     ${isHost ? '<button id="startGameBtn">Start Game</button>' : ''}
+    <button id="leaveRoomBtn">Leave Room</button>
   `;
   
   if (isHost) {
+    document.getElementById('difficultySelect').addEventListener('change', handleDifficultyChange);
     document.getElementById('startGameBtn').onclick = () => {
       database.ref('rooms/' + roomId).update({
         gameRunning: true
@@ -336,10 +384,19 @@ function showWaitingPopup(isJoiner) {
     };
   }
   
+  document.getElementById('leaveRoomBtn').onclick = () => {
+    if (isHost) {
+      database.ref('rooms/' + roomId).remove();
+    } else {
+      database.ref('rooms/' + roomId + '/players/' + playerId).remove();
+    }
+    showInitialPopup();
+  };
+  
   popup.style.display = 'flex';
 }
 
-// Modified createBag function
+// Create a falling bag with current difficulty
 function createBag() {
   if (!gameRunning) return;
 
@@ -380,7 +437,7 @@ function createBag() {
   }, duration * 1000);
 }
 
-// Modified showPopup function
+// Show game over popup
 function showPopup(withResume = false) {
   document.querySelectorAll('.bag').forEach(bag => bag.remove());
   
@@ -398,6 +455,7 @@ function showPopup(withResume = false) {
     <p2>${resultMessage}</p2>
     <p><strong>You: ${totalCoins}DH🪙</strong></p>
     <p><strong>Opponent: ${opponentCoins}DH🪙</strong></p>
+    <p>Difficulty: ${currentDifficulty}</p>
     <br><br>
     <button id="restartBtn">Play Again</button>
     <button id="newRoomBtn">New Room</button>
@@ -425,7 +483,7 @@ function showPopup(withResume = false) {
   popup.style.display = 'flex';
 }
 
-// Modified startGame function
+// Start the game
 function startGame() {
   totalCoins = 0;
   opponentCoins = 0;
@@ -455,15 +513,30 @@ function startGame() {
   }, gameDuration);
 }
 
-// Initial popup to create or join room
+// Initial popup with difficulty selection
 function showInitialPopup() {
   popup.innerHTML = `
     <p2>Multiplayer Falling Bags</p2>
     <p>Play with a friend!</p>
+    
+    <label for="initialDifficulty">Select Difficulty:</label>
+    <select id="initialDifficulty">
+      <option value="normal">Normal</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+      <option value="khra_la_shditi">khra la shditi</option>
+    </select>
+    
     <button id="createRoomBtn">Create Room</button>
     <input type="text" id="roomCodeInput" placeholder="Enter room code">
     <button id="joinRoomBtn">Join Room</button>
   `;
+  
+  // Set initial difficulty
+  document.getElementById('initialDifficulty').value = currentDifficulty;
+  document.getElementById('initialDifficulty').addEventListener('change', (e) => {
+    currentDifficulty = e.target.value;
+  });
   
   document.getElementById('createRoomBtn').onclick = () => createRoom();
   document.getElementById('joinRoomBtn').onclick = () => {
