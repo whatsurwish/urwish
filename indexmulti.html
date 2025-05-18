@@ -7,7 +7,7 @@
   <meta charset="UTF-8" />
   <title>Falling Bags Game</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<style>
+  <style>
     html, body {
       background: url(https://cdn.theanimegallery.com/theanimegallery/0f50ae0f-3151-4586-8a03-bd255c359ee5-anime-wallpaper-in-hd.webp);
       margin: 0;
@@ -190,6 +190,23 @@
       background-color: orange;
     }
   </style>
+</head>
+<body>
+<button id="pauseBtn" aria-label="Pause game" title="Pause game">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+    <rect x="5" y="4" width="5" height="16" rx="1"/>
+    <rect x="14" y="4" width="5" height="16" rx="1"/>
+  </svg>
+</button>
+
+
+  <div id="gameBox">
+     
+  </div>
+  <div id="popup"></div>
+  <audio id="popSound" src="win.wav"></audio>
+
+<script>
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCU1YjVXVXgy_xIoS-zMsuSfHbqB0AfwsI",
