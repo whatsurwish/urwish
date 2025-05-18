@@ -68,7 +68,18 @@
       width: 95vw;
       max-width: 200px;
     }
-
+    #difficultySelect {
+      margin: 2px;
+      font-size: 16px;
+      font-family: monospace;
+      padding: 2px 14px;
+      border-radius: 2px;
+      background: #7f98ff;
+      border: 2px solid #000000bf;
+      max-width: 200px;
+      width: 95vw;
+      max-width: 200px;
+    }
     #gameBox {
     width: 95vw;
     max-width: 500px;
@@ -76,6 +87,7 @@
     height: 100dvh;
     border: 4px solid rgb(0, 0, 0);
     position: relative;
+    touch-action: none; /* Prevents browser touch behaviors */
     overflow: hidden;
     backdrop-filter: blur(3px);
     background: linear-gradient(rgba(51, 0, 255, 0.679), rgba(5, 169, 219, 0.671));
@@ -86,12 +98,28 @@
       max-width: 112px;
       height: 24vw;
       max-height: 112px;
-      background: url('images/goodie.png') no-repeat center/contain;
+      background: url('goodie.png') no-repeat center/contain;
       position: absolute;
       top: -60px;
       cursor: pointer;
       animation-timing-function: linear;
+      touch-action: manipulation; /* Disables double-tap zoom */
+      -webkit-tap-highlight-color: transparent; /* Removes tap highlight on iOS */
+      transition: transform 0.1s ease-out;
     }
+.bag:active {
+  transform: scale(0.9);
+}
+
+.bag.clicked {
+  animation: pop 0.2s forwards;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(0); opacity: 0; }
+}
 
     @keyframes fall {
       from { top: -100px; }
@@ -211,6 +239,12 @@ let gameStartTime = 0;
 let elapsedTime = 0;
 const gameDuration = 20000;
 
+// Performance optimization
+let lastFrameTime = 0;
+const fpsLimit = 60;
+const minFrameTime = 1000 / fpsLimit;
+let clickDebounce = false;
+
 // Multiplayer state
 let playerId = Math.random().toString(36).substring(2, 15);
 let roomId = null;
@@ -226,7 +260,7 @@ const difficultySettings = {
   khra_la_shditi: { minDuration: 0.5, maxDuration: 1.5 }
 };
 
-// Create a new room with difficulty selection
+// Create a new room
 function createRoom() {
   isHost = true;
   roomId = Math.random().toString(36).substring(2, 9);
@@ -396,12 +430,19 @@ function showWaitingPopup(isJoiner) {
   popup.style.display = 'flex';
 }
 
-// Create a falling bag with current difficulty
+// Create a falling bag with optimized click handling
 function createBag() {
   if (!gameRunning) return;
 
   const bag = document.createElement('div');
   bag.classList.add('bag');
+  
+  // Optimize for touch/click
+  bag.style.pointerEvents = 'auto';
+  bag.style.userSelect = 'none';
+  bag.style.webkitUserSelect = 'none';
+  bag.style.touchAction = 'manipulation';
+  bag.style.webkitTapHighlightColor = 'transparent';
 
   const boxWidth = gameBox.clientWidth;
   const bagWidth = boxWidth * 0.24;
@@ -412,29 +453,57 @@ function createBag() {
   const duration = minDuration + Math.random() * (maxDuration - minDuration);
   bag.style.animation = `fall ${duration}s linear forwards`;
 
-  bag.addEventListener('click', () => {
-    navigator.vibrate?.(80);
-    popSound.currentTime = 0;
-    popSound.play();
-
-    const coins = Math.floor(Math.random() * 400) + 1;
-    totalCoins += coins;
-    
-    // Update coins in database
-    database.ref('rooms/' + roomId + '/players/' + playerId).update({
-      coins: totalCoins
-    });
-
-    bag.remove();
-  });
-
   gameBox.appendChild(bag);
 
   setTimeout(() => {
     if (gameBox.contains(bag)) {
-      bag.remove();
+      bag.style.transition = 'opacity 0.5s ease-out';
+      bag.style.opacity = '0';
+      setTimeout(() => {
+        if (gameBox.contains(bag)) bag.remove();
+      }, 500);
     }
   }, duration * 1000);
+}
+
+// Handle bag clicks with improved responsiveness
+function handleBagClick(bag) {
+  if (!gameRunning || !gameBox.contains(bag) || clickDebounce) return;
+  
+  clickDebounce = true;
+  setTimeout(() => { clickDebounce = false; }, 100);
+
+  // Visual feedback
+  bag.style.transition = 'transform 0.1s ease-out, opacity 0.2s ease-out';
+  bag.style.transform = 'scale(1.2)';
+  bag.style.opacity = '0.8';
+
+  // Effects
+  navigator.vibrate?.(80);
+  popSound.currentTime = 0;
+  popSound.play();
+
+  // Scoring
+  const coins = Math.floor(Math.random() * 400) + 1;
+  totalCoins += coins;
+  database.ref('rooms/' + roomId + '/players/' + playerId).update({ coins: totalCoins });
+
+  // Remove with animation
+  setTimeout(() => {
+    if (gameBox.contains(bag)) bag.remove();
+  }, 200);
+}
+
+// Game loop for performance optimization
+function gameLoop(timestamp) {
+  if (timestamp - lastFrameTime < minFrameTime) {
+    requestAnimationFrame(gameLoop);
+    return;
+  }
+  lastFrameTime = timestamp;
+  
+  // Your game logic here
+  requestAnimationFrame(gameLoop);
 }
 
 // Show game over popup
@@ -483,7 +552,7 @@ function showPopup(withResume = false) {
   popup.style.display = 'flex';
 }
 
-// Start the game
+// Start the game with optimized event listeners
 function startGame() {
   totalCoins = 0;
   opponentCoins = 0;
@@ -501,6 +570,21 @@ function startGame() {
   clearInterval(gameInterval);
   clearTimeout(gameTimeout);
 
+  // Setup optimized event listeners
+  gameBox.addEventListener('pointerdown', (e) => {
+    if (e.target.classList.contains('bag')) {
+      e.preventDefault();
+      handleBagClick(e.target);
+    }
+  });
+  
+  // Fallback for click
+  gameBox.addEventListener('click', (e) => {
+    if (e.target.classList.contains('bag')) {
+      handleBagClick(e.target);
+    }
+  });
+
   gameStartTime = Date.now();
   elapsedTime = 0;
 
@@ -511,6 +595,9 @@ function startGame() {
     clearInterval(gameInterval);
     showPopup(false);
   }, gameDuration);
+  
+  // Start game loop
+  requestAnimationFrame(gameLoop);
 }
 
 // Initial popup with difficulty selection
