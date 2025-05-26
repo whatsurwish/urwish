@@ -215,8 +215,48 @@
         }
     </style>
 </head>
-<body>
-    <div class="container">
+<body> <!-- Add this password protection div at the top -->
+    <div id="password-protection" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 9999;
+        backdrop-filter: blur(10px);
+    ">
+        <h1 style="color: white; margin-bottom: 20px;">Enter Password</h1>
+        <input type="password" id="password-input" style="
+            padding: 10px 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 2px solid #7289da;
+            background: #36393f;
+            color: white;
+            outline: none;
+            width: 300px;
+            max-width: 80%;
+            margin-bottom: 15px;
+        " placeholder="Enter password">
+        <button id="password-submit" style="
+            padding: 10px 25px;
+            background: #7289da;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+        ">Submit</button>
+        <p id="password-error" style="color: #f04747; margin-top: 15px; display: none;">Incorrect password. Please try again.</p>
+    </div>
+
+    <div class="container" style="display: none;">
         <header>
             <h1>SHADOW Bot Control Panel</h1>
         </header>
@@ -272,6 +312,66 @@
             const statusText2 = document.getElementById('status-text2');
             const logsContainer = document.getElementById('logs-container');
             const deployResult = document.getElementById('deploy-result');
+            const passwordProtection = document.getElementById('password-protection');
+            const passwordInput = document.getElementById('password-input');
+            const passwordSubmit = document.getElementById('password-submit');
+            const passwordError = document.getElementById('password-error');
+            const mainContainer = document.querySelector('.container');
+
+// Check if already authenticated (using sessionStorage)
+if (sessionStorage.getItem('authenticated')) {
+    passwordProtection.style.display = 'none';
+    mainContainer.style.display = 'block';
+}
+
+async function verifyPassword(password) {
+    try {
+        const response = await fetch(`${BASE_URL}/api/verify-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password: password })
+        });
+        
+        const data = await response.json();
+        return data.valid;
+    } catch (error) {
+        console.error('Error verifying password:', error);
+        return false;
+    }
+}
+
+async function handlePasswordSubmit() {
+    const password = passwordInput.value.trim();
+    
+    if (!password) {
+        passwordError.textContent = 'Please enter a password';
+        passwordError.style.display = 'block';
+        return;
+    }
+
+    const isValid = await verifyPassword(password);
+    
+    if (isValid) {
+        passwordProtection.style.display = 'none';
+        mainContainer.style.display = 'block';
+        sessionStorage.setItem('authenticated', 'true');
+    } else {
+        passwordError.textContent = 'Incorrect password. Please try again.';
+        passwordError.style.display = 'block';
+        passwordInput.value = '';
+        passwordInput.focus();
+    }
+}
+
+passwordSubmit.addEventListener('click', handlePasswordSubmit);
+
+passwordInput.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+        await handlePasswordSubmit();
+    }
+});
 
             let logs = [];
             let autoScroll = true;
