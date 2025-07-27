@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>🚨 Protest Alert: Free Gaza</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: url(alert.jpg);
+      backdrop-filter: blur(2px);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-size: cover;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      border: 2px solid rgb(21, 148, 4);
+      border-radius: 10px;
+      background-color: #1a111173;
+      backdrop-filter: blur(6px);
+      max-width: 400px;
+    }
+
+    button {
+      background: linear-gradient(170deg , black , red , rgb(14, 120, 5));
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+      transition: background 200ms ease-in-out;
+    }
+
+    button:hover {
+      background: linear-gradient(170deg ,red , black , rgb(14, 120, 5));
+    }
+
+    .status {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: gray;
+    }
+      .popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #ff2020;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+      display: none;
+      z-index: 1000;
+      animation: fadeInOut 6s ease-in-out;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(20px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📢 Protest Alert</h1>
+    <p>Stay notified to protest against Gaza crimes.</p>
+    <button id="notify-btn">Enable Notifications</button>
+    <p id="status" class="status">WebSocket: Not Connected</p>
+  </div>
+
+  <!-- Popup message box -->
+  <div id="popup" class="popup"></div>
+
+  <script>
+    const notifyBtn = document.getElementById('notify-btn');
+    const statusText = document.getElementById('status');
+    const popup = document.getElementById('popup');
+    const audio = new Audio('alert.wav'); // Place alert.mp3 in same folder
+
+    const socket = new WebSocket('ws://localhost:3000'); // Use ws:// in local dev
+
+    let notificationEnabled = false;
+
+    notifyBtn.onclick = () => {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          notificationEnabled = true;
+          showPopup('✅ Notifications enabled');
+        } else {
+          showPopup('❌ Notifications not allowed');
+        }
+      });
+    };
+
+    socket.onopen = () => {
+      statusText.textContent = 'Connected ✅';
+      statusText.style.color = 'lime';
+    };
+
+    socket.onerror = (err) => {
+      console.error('WebSocket error', err);
+      statusText.textContent = 'Error ❌';
+      statusText.style.color = 'orange';
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'alert') {
+          showProtestNotification(data.message || '🚨 Protest Now for Gaza!');
+        }
+      } catch (e) {
+        console.error('Invalid message:', event.data);
+      }
+    };
+
+    function showProtestNotification(message) {
+      if (notificationEnabled) {
+        new Notification('🚨 Protest Alert', {
+          body: message,
+          icon: 'alert.png'
+        });
+      }
+      audio.play();
+      showPopup(message);
+    }
+
+    function showPopup(message) {
+      popup.textContent = message;
+      popup.style.display = 'block';
+      popup.style.animation = 'fadeInOut 6s ease-in-out';
+
+      setTimeout(() => {
+        popup.style.display = 'none';
+      }, 6000);
+    }
+  </script>
+</body>
+</html>
