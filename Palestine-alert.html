@@ -85,7 +85,7 @@
     const notifyBtn = document.getElementById('notify-btn');
     const statusText = document.getElementById('status');
     const popup = document.getElementById('popup');
-    const audio = new Audio('alert.wav'); // Place alert.mp3 in same folder
+    const audio = new Audio('src/alert.wav'); // Place alert.mp3 in same folder
 
     const socket = new WebSocket('ws://localhost:3000'); // Use ws:// in local dev
 
@@ -128,7 +128,7 @@
       if (notificationEnabled) {
         new Notification('🚨 Protest Alert', {
           body: message,
-          icon: 'alert.png'
+          icon: 'src/alert.png'
         });
       }
       audio.play();
